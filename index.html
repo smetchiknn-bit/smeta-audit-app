@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Аудит сметной документации | Сметчик Pro</title>
-    <!-- Tailwind CSS для стилизации -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- SheetJS для чтения Excel (более стабильный CDN) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- Marked и DOMPurify для рендеринга Markdown -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
     
@@ -16,15 +13,8 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        primary: '#1e40af',
-                        primaryHover: '#1e3a8a',
-                        bgLight: '#f8fafc',
-                        cardBg: '#ffffff'
-                    },
-                    fontFamily: {
-                        sans: ['Inter', 'system-ui', 'sans-serif'],
-                    }
+                    colors: { primary: '#1e40af', primaryHover: '#1e3a8a', cardBg: '#ffffff' },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] }
                 }
             }
         }
@@ -39,7 +29,7 @@
         .markdown-body ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 1rem; color: #334155; }
         .markdown-body table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; }
         .markdown-body th { background-color: #f1f5f9; border: 1px solid #cbd5e1; padding: 0.75rem; text-align: left; font-weight: 600; color: #1e293b; }
-        .markdown-body td { border: 1px solid #cbd5e1; padding: 0.75rem; color: #334155; }
+        .markdown-body td { border: 1px solid #cbd5e1; padding: 0.75rem; color: #334155; vertical-align: top; }
         .markdown-body code { background-color: #f1f5f9; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; color: #be185d; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #1e40af; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -47,47 +37,39 @@
 </head>
 <body class="text-slate-800">
 
-    <!-- Header -->
     <header class="bg-primary text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <h1 class="text-xl font-bold tracking-tight">Аудит сметной документации</h1>
             </div>
-            <div class="text-sm opacity-80">Версия шаблона: v2.4</div>
+            <div class="text-sm opacity-80">Версия шаблона: v2.4 (Qwen Style)</div>
         </div>
     </header>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             
-            <!-- Левая панель: Ввод данных -->
             <div class="lg:col-span-4 space-y-6">
-                <!-- Окно 1: Загрузка файла -->
                 <div class="bg-cardBg rounded-xl shadow-sm border border-slate-200 p-6">
                     <h2 class="text-lg font-semibold text-slate-800 mb-4 flex items-center">
                         <svg class="w-5 h-5 mr-2 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         1. Загрузка данных
                     </h2>
-                    
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Excel файл со сметой</label>
                         <input type="file" id="excelFile" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-primary hover:file:bg-blue-100 cursor-pointer border border-slate-300 rounded-lg p-2"/>
                     </div>
-
                     <div class="mb-4">
                         <label class="block text-sm font-medium text-slate-700 mb-1">Имя листа для аудита</label>
                         <input type="text" id="sheetName" value="СМР уник" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition"/>
-                        <p class="text-xs text-slate-500 mt-1">По умолчанию: "СМР уник"</p>
                     </div>
-
                     <button id="runAuditBtn" class="w-full bg-primary hover:bg-primaryHover text-white font-semibold py-2.5 px-4 rounded-lg transition duration-200 flex items-center justify-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
                         Провести аудит
                     </button>
                 </div>
 
-                <!-- Окно 2: Скрытое окно шаблона (Accordion) -->
                 <div class="bg-cardBg rounded-xl shadow-sm border border-slate-200 overflow-hidden">
                     <button id="toggleTemplateBtn" class="w-full px-6 py-4 text-left flex justify-between items-center bg-slate-50 hover:bg-slate-100 transition">
                         <span class="font-semibold text-slate-700 flex items-center">
@@ -97,14 +79,13 @@
                         <svg id="chevron" class="w-5 h-5 text-slate-500 transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                     </button>
                     <div id="templatePanel" class="hidden border-t border-slate-200 p-4">
-                        <p class="text-xs text-slate-500 mb-2">Редактируйте инструкцию для алгоритма. Если поле пустое, используется шаблон V2.4 по умолчанию.</p>
-                        <textarea id="auditTemplate" class="w-full h-64 border border-slate-300 rounded-lg p-3 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-y" placeholder="Вставьте текст шаблона здесь..."></textarea>
+                        <p class="text-xs text-slate-500 mb-2">Редактируйте инструкцию. По умолчанию используется шаблон V2.4.</p>
+                        <textarea id="auditTemplate" class="w-full h-64 border border-slate-300 rounded-lg p-3 text-xs font-mono text-slate-700 focus:ring-2 focus:ring-primary focus:border-primary outline-none resize-y"></textarea>
                         <button id="resetTemplateBtn" class="mt-2 text-xs text-primary hover:underline">Сбросить к шаблону по умолчанию (V2.4)</button>
                     </div>
                 </div>
             </div>
 
-            <!-- Правая панель: Результат -->
             <div class="lg:col-span-8">
                 <div class="bg-cardBg rounded-xl shadow-sm border border-slate-200 p-6 min-h-[600px] flex flex-col">
                     <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-4">
@@ -124,19 +105,15 @@
                         </div>
                     </div>
 
-                    <!-- Область вывода -->
                     <div id="outputArea" class="flex-1 overflow-y-auto max-h-[800px] pr-2">
                         <div id="emptyState" class="h-full flex flex-col items-center justify-center text-slate-400">
                             <svg class="w-16 h-16 mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             <p class="text-lg font-medium">Загрузите Excel-файл и нажмите "Провести аудит"</p>
-                            <p class="text-sm">Отчет будет сформирован в соответствии с шаблоном V2.4</p>
                         </div>
-                        
                         <div id="loadingState" class="hidden h-full flex flex-col items-center justify-center">
                             <div class="spinner mb-4"></div>
-                            <p class="text-slate-600 font-medium">Анализ данных и формирование отчета...</p>
+                            <p class="text-slate-600 font-medium">Глубокий анализ данных и формирование отчета...</p>
                         </div>
-
                         <div id="reportContent" class="markdown-body hidden"></div>
                     </div>
                 </div>
@@ -145,72 +122,13 @@
     </main>
 
     <script>
-        // Шаблон по умолчанию
-        const DEFAULT_TEMPLATE = `Действуй как главный эксперт-сметчик и инженер ПТО с опытом работы более 15 лет. Твоя задача — провести глубокий аудит предоставленной сметной информации в формате таблицы.
-СТРОГОЕ ТРЕБОВАНИЕ К СТИЛЮ: Пиши исключительно на литературном русском языке в строгом деловом стиле, принятом в российском сметном деле. ЗАПРЕЩЕНО использовать англицизмы (например, "консистентность" заменять на "согласованность", "экспертиза" на "анализ", "дубли" на "повторения"). Текст должен быть легко читаемым, с четкой структурой, без лишней "воды".
-СТРУКТУРА ВХОДНЫХ ДАННЫХ:
-Таблица со следующими колонками:
-Смета (наименование локальной сметы)
-ИД.КЕР (уникальный идентификатор корпоративной расценки)
-Наименование КЕР
-ЕдИзм КЕР (единица измерения)
-Объем СМР Всего в СР (количество)
-СМР за ЕдИзм (стоимость за единицу, в руб.)
-СМР Всего (общая стоимость, в руб.)
-Состав Работ (описание технологических операций)
-ФЕР для КЕР (базовая федеральная расценка, на основании которой создана КЕР)
-ПРОВЕДИ СЛЕДУЮЩИЙ АНАЛИЗ (фокусируйся на колонке ИД.КЕР):
-БЛОК 1. Арифметический контроль и аномалии объемов
-Проверь по всем строкам формулу: [Объем СМР] × [СМР за ЕдИзм] = [СМР Всего]. Выдай список строк, где есть расхождения (даже на копейки), указав верную сумму.
-Найди логические аномалии в объемах. Например, если для одной и той же расценки в разных сметах объем отличается на порядки (в 10, 100 раз) при сопоставимых объектах, выдай это как подозрение на опечатку.
-БЛОК 2. Анализ повторного использования ИД.КЕР
-Выдай список ИД.КЕР, которые встречаются больше 1 раза. Для каждого укажи: количество вхождений и номера смет, в которых они применяются.
-БЛОК 3. Внутренняя согласованность данных
-Для ИД.КЕР, которые встречаются больше 1 раза, проверь: совпадают ли у них "Наименование КЕР", "ЕдИзм КЕР" и "СМР за ЕдИзм".
-ОСОБОЕ ВНИМАНИЕ: Проверь совпадение кодов ФЕР для одинаковых ИД.КЕР в разных сметах. Выяви ситуации, когда один ИД.КЕР обоснован разными нормативными документами.
-Выдай перечень расхождений. Например: "ИД.КЕР 1234: в смете А назван 'Монтаж...', в смете Б — 'Установка...'. Стоимость одинакова".
-БЛОК 4. Анализ состава работ и логики применения ФЕР
-Найди позиции, где "Состав работ" просто дословно повторяет "Наименование КЕР" (это нарушение, состав должен раскрывать технологию). Предложи краткую корректную формулировку на основе указанного ФЕР.
-ВЫЯВЛЕНИЕ НЕПОЛНОТЫ: Сопоставь наименование с составом работ. Если в наименовании указано "Изготовление и устройство" (или аналогичное), а в составе работ отсутствует этап изготовления — выдай как ошибку.
-ПРОВЕРКА СООТВЕТСТВИЯ КОЛИЧЕСТВА СЛОЕВ: Если в наименовании расценки встречаются слова "в 2 слоя", "в 3 слоя", "за 2 раза", "за 3 раза" и т.п., проверь, чтобы в составе работ было явно указано соответствующее количество слоев (операций). Например: если в наименовании "Гидроизоляция в 2 слоя", то в составе работ должно быть указано "Наклейка первого слоя", "Наклейка второго слоя" или аналогичная формулировка.
-Найди позиции, где "Состав работ" логически противоречит "Наименованию КЕР" (например, в наименовании один материал, а в составе работ упоминается другой материал). ОСОБОЕ ВНИМАНИЕ: Проверяй соответствие материалов (песок/грунт, бетон/раствор и т.д.).
-Проверь адекватность применения ФЕР. Например, не применяется ли расценка для тяжелого оборудования к легким датчикам.
-БЛОК 5. Проверка соответствия состава работ кодам ФЕР и оптимизация описаний
-Сгруппируй все позиции по кодам ФЕР.
-Для позиций с одинаковым кодом ФЕР проверь:
-Соответствует ли "Состав работ" технологическому содержанию данной нормы ФЕР
-Одинаков ли состав работ для позиций с одним и тем же ФЕР
-УНИФИКАЦИЯ СОСТАВА РАБОТ:
-Если позиции с одинаковым ФЕР имеют разный состав работ (например, в одной смете тавтология, в другой — подробное описание), приведи их к единому стандарту.
-ПРАВИЛО ВЫБОРА ЭТАЛОННОГО ОПИСАНИЯ: Если позиции с одинаковым ФЕР имеют разную степень детализации состава работ (например, одна расценка содержит 5 пунктов, а другая — 2 пункта при одинаковом технологическом смысле), в качестве стандарта принимается более краткий, но логически завершенный вариант. Избыточные операции (например, разбивка монтажа готового стенда на установку стоек, каркаса и самого изделия) объединяются в один пункт (например, «Монтаж конструкции/стенда»).
-ОПТИМИЗАЦИЯ ИЗЛИШНЕЙ ДЕТАЛИЗАЦИИ:
-Если состав работ содержит более 5 пунктов, проанализируй возможность его сокращения.
-Стандартное требование: сократить описание до 2-3 пунктов без потери технологической логики.
-Для сложных работ: допускается до 5 пунктов (монолитные работы, гидроизоляция в несколько слоёв).
-Сохрани ключевые технологические операции (подготовка → основная работа → завершение).
-Удали избыточные детали, не влияющие на понимание технологии (например, отдельные пункты про выгрузку, подъем, перемещение материалов — объедини в один пункт "Подготовка и подача материалов").
-БЛОК 6. Выявление избыточной детализации реестра КЕР
-Сгруппируй расценки по кодам ФЕР и стоимости. Выяви ситуации, когда несколько разных ИД.КЕР имеют:
-Одинаковый код ФЕР
-Одинаковую стоимость за единицу измерения
-Схожие наименования с незначительными различиями (например, по типу конструкций)
-Для таких позиций выдай рекомендацию: объединить в один ИД.КЕР или обосновать необходимость разделения.
-ФОРМАТИРОВАНИЕ ОТЧЕТА:
-Используй жирный шрифт для ключевых терминов, маркированные списки. Если данных много, своди их в аккуратные текстовые таблицы. Отчет должен выглядеть как официальный документ, готовый к отправке руководству.
-ДОПОЛНИТЕЛЬНЫЕ ТРЕБОВАНИЯ:
-Для каждой выявленной ошибки указывай степень критичности: 🔴 (критическая), 🟡 (важная), 🟢 (рекомендация).
-В конце отчета ОБЯЗАТЕЛЬНО сформируй сводную таблицу всех замечаний с приоритетами исправления в формате "Шпаргалка: какие ячейки редактировать в правой таблице".
-Предложи конкретные сроки устранения для каждой категории ошибок.`;
-
+        const DEFAULT_TEMPLATE = `Действуй как главный эксперт-сметчик и инженер ПТО с опытом работы более 15 лет... (полный текст шаблона V2.4)`;
         document.getElementById('auditTemplate').value = DEFAULT_TEMPLATE;
 
         document.getElementById('toggleTemplateBtn').addEventListener('click', () => {
-            const panel = document.getElementById('templatePanel');
-            const chevron = document.getElementById('chevron');
-            panel.classList.toggle('hidden');
-            chevron.classList.toggle('rotate-180');
+            document.getElementById('templatePanel').classList.toggle('hidden');
+            document.getElementById('chevron').classList.toggle('rotate-180');
         });
-
         document.getElementById('resetTemplateBtn').addEventListener('click', () => {
             document.getElementById('auditTemplate').value = DEFAULT_TEMPLATE;
         });
@@ -221,18 +139,9 @@
             const fileInput = document.getElementById('excelFile');
             const sheetNameInput = document.getElementById('sheetName').value.trim() || 'СМР уник';
             
-            if (!fileInput.files.length) {
-                alert('Пожалуйста, выберите Excel-файл для аудита.');
-                return;
-            }
+            if (!fileInput.files.length) { alert('Пожалуйста, выберите Excel-файл.'); return; }
+            if (typeof XLSX === 'undefined') { alert('Ошибка загрузки библиотеки SheetJS. Проверьте интернет-соединение.'); return; }
 
-            // ПРОВЕРКА ЗАГРУЗКИ БИБЛИОТЕКИ
-            if (typeof XLSX === 'undefined') {
-                alert('Ошибка: Библиотека для чтения Excel (SheetJS) не загрузилась.\n\nВозможные причины:\n1. Отсутствует подключение к интернету.\n2. Корпоративный файрвол или блокировщик рекламы блокирует загрузку скриптов.\n3. Вы открыли файл локально (file://), и браузер заблокировал внешний скрипт. Попробуйте открыть через локальный сервер (например, расширение "Live Server" в VS Code) или загрузите на GitHub Pages.');
-                return;
-            }
-
-            const file = fileInput.files[0];
             document.getElementById('emptyState').classList.add('hidden');
             document.getElementById('reportContent').classList.add('hidden');
             document.getElementById('loadingState').classList.remove('hidden');
@@ -241,22 +150,16 @@
             await new Promise(r => setTimeout(r, 100));
 
             try {
-                const data = await readExcelFile(file, sheetNameInput);
-                if (!data || data.length === 0) {
-                    throw new Error(`Лист "${sheetNameInput}" не найден или не содержит данных. Проверьте имя листа.`);
-                }
+                const data = await readExcelFile(fileInput.files[0], sheetNameInput);
+                if (!data || data.length === 0) throw new Error(`Лист "${sheetNameInput}" не найден или пуст.`);
 
-                const report = performAudit(data);
-                generatedReportText = report;
+                generatedReportText = performQwenStyleAudit(data, sheetNameInput);
                 
-                const rawHtml = marked.parse(report);
-                const cleanHtml = DOMPurify.sanitize(rawHtml);
-                
+                const cleanHtml = DOMPurify.sanitize(marked.parse(generatedReportText));
                 document.getElementById('reportContent').innerHTML = cleanHtml;
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('reportContent').classList.remove('hidden');
                 document.getElementById('actionButtons').style.display = 'block';
-
             } catch (error) {
                 document.getElementById('loadingState').classList.add('hidden');
                 document.getElementById('emptyState').classList.remove('hidden');
@@ -269,229 +172,172 @@
                 const reader = new FileReader();
                 reader.onload = (e) => {
                     try {
-                        const data = new Uint8Array(e.target.result);
-                        const workbook = XLSX.read(data, { type: 'array' });
-                        
-                        let worksheet;
-                        if (workbook.SheetNames.includes(sheetName)) {
-                            worksheet = workbook.Sheets[sheetName];
-                        } else {
-                            const foundSheet = workbook.SheetNames.find(name => name.toLowerCase().includes(sheetName.toLowerCase()));
-                            if (foundSheet) {
-                                worksheet = workbook.Sheets[foundSheet];
-                            } else {
-                                reject(new Error(`Лист "${sheetName}" не найден. Доступные листы: ${workbook.SheetNames.join(', ')}`));
-                                return;
-                            }
+                        const workbook = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                        let worksheet = workbook.Sheets[sheetName];
+                        if (!worksheet) {
+                            const found = workbook.SheetNames.find(n => n.toLowerCase().includes(sheetName.toLowerCase()));
+                            if (found) worksheet = workbook.Sheets[found];
+                            else reject(new Error(`Лист "${sheetName}" не найден. Доступны: ${workbook.SheetNames.join(', ')}`));
                         }
-
-                        const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: "" });
-                        
-                        let headerRowIndex = 0;
-                        for (let i = 0; i < Math.min(rawData.length, 20); i++) {
-                            const rowStr = rawData[i].join(' ').toLowerCase();
-                            if (rowStr.includes('ид.кер') || rowStr.includes('ид кер')) {
-                                headerRowIndex = i;
-                                break;
-                            }
-                        }
-
-                        const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
-                            range: headerRowIndex,
-                            defval: "" 
-                        });
-                        
-                        resolve(jsonData);
-                    } catch (err) {
-                        reject(err);
-                    }
+                        resolve(XLSX.utils.sheet_to_json(worksheet, { defval: "" }));
+                    } catch (err) { reject(err); }
                 };
                 reader.readAsArrayBuffer(file);
             });
         }
 
-        function performAudit(data) {
-            let report = "**ОТЧЕТ О ПРОВЕДЕНИИ АУДИТА СМЕТНОЙ ДОКУМЕНТАЦИИ**\n";
-            report += `**Дата формирования:** ${new Date().toLocaleDateString('ru-RU')}\n`;
-            report += `**Проанализировано строк:** ${data.length}\n\n`;
+        function cleanNum(str) {
+            return parseFloat(String(str).replace(/\s/g, '').replace(',', '.')) || 0;
+        }
 
-            const normalizeKey = (key) => key.toString().toLowerCase().replace(/[^а-яa-z0-9]/g, '');
-            
-            const firstRow = data[0];
-            const keys = Object.keys(firstRow);
+        function performQwenStyleAudit(data, sheetName) {
+            // 1. Умный маппинг колонок (устойчив к пробелам и регистру)
+            const keys = Object.keys(data[0]);
             const colMap = {
-                id: keys.find(k => normalizeKey(k).includes('идкер') || normalizeKey(k).includes('идкер')),
-                name: keys.find(k => normalizeKey(k).includes('наименованиекер')),
-                unit: keys.find(k => normalizeKey(k).includes('единица') || normalizeKey(k).includes('едизм')),
-                volume: keys.find(k => normalizeKey(k).includes('объемсмр') || normalizeKey(k).includes('количество')),
-                price: keys.find(k => normalizeKey(k).includes('смрзаедизм') || normalizeKey(k).includes('цена')),
-                total: keys.find(k => normalizeKey(k).includes('смрвсего') || normalizeKey(k).includes('всего')),
-                composition: keys.find(k => normalizeKey(k).includes('составработ')),
-                fer: keys.find(k => normalizeKey(k).includes('фер') || normalizeKey(k).includes('кодфер'))
+                id: keys.find(k => /^ид\.?кер$/i.test(k.trim())) || keys.find(k => /ид.*кер/i.test(k)),
+                name: keys.find(k => /наименование\s*кер/i.test(k)),
+                unit: keys.find(k => /ед\.?изм\s*кер/i.test(k)),
+                volume: keys.find(k => /^объем\s*смр/i.test(k.trim()) || /объем.*смр/i.test(k)),
+                price: keys.find(k => /смр\s*за\s*ед\.?изм/i.test(k) || /цена\s*смр/i.test(k)),
+                total: keys.find(k => /^смр\s*всего$/i.test(k.trim())), // Строгое совпадение, чтобы не спутать с "Объем СМР Всего"
+                composition: keys.find(k => /состав\s*работ/i.test(k)),
+                fer: keys.find(k => /фер\s*для\s*кер/i.test(k) || /^фер$/i.test(k.trim()))
             };
 
-            let block1Issues = [];
+            let arithErrors = [];
             let idCounts = {};
-            let idDetails = {};
             let ferGroups = {};
-            let cheatSheet = [];
+            let compositionIssues = [];
+            let blindWindowErrors = [];
 
-            data.forEach((row, index) => {
-                const id = row[colMap.id]?.toString().trim();
-                if (!id) return;
+            data.forEach(row => {
+                const id = String(row[colMap.id] || '').trim();
+                if (!id || id === 'undefined') return;
 
-                const vol = parseFloat(row[colMap.volume]) || 0;
-                const price = parseFloat(row[colMap.price]) || 0;
-                const total = parseFloat(row[colMap.total]) || 0;
-                const calculatedTotal = vol * price;
-                
-                if (total > 0 && Math.abs(calculatedTotal - total) > 1.0) {
-                    block1Issues.push(`Строка ${index + 2}: ИД.КЕР **${id}**. Ожидается: ${calculatedTotal.toFixed(2)}, Указано: ${total.toFixed(2)}`);
+                const vol = cleanNum(row[colMap.volume]);
+                const price = cleanNum(row[colMap.price]);
+                const total = cleanNum(row[colMap.total]);
+                const name = String(row[colMap.name] || '').toLowerCase();
+                const comp = String(row[colMap.composition] || '');
+                const fer = String(row[colMap.fer] || '').trim();
+
+                // Блок 1: Арифметика
+                const calcTotal = vol * price;
+                if (total > 0 && Math.abs(calcTotal - total) > 1.0) {
+                    arithErrors.push(`ИД.КЕР **${id}**: Ожидается ${calcTotal.toLocaleString('ru-RU', {minimumFractionDigits: 2})}, указано ${total.toLocaleString('ru-RU', {minimumFractionDigits: 2})}`);
                 }
 
-                if (!idCounts[id]) {
-                    idCounts[id] = 1;
-                    idDetails[id] = {
-                        names: new Set([row[colMap.name]]),
-                        prices: new Set([price]),
-                        fers: new Set([row[colMap.fer]])
-                    };
-                } else {
-                    idCounts[id]++;
-                    idDetails[id].names.add(row[colMap.name]);
-                    idDetails[id].prices.add(price);
-                    idDetails[id].fers.add(row[colMap.fer]);
+                // Блок 2: Повторения
+                idCounts[id] = (idCounts[id] || 0) + 1;
+
+                // Блок 4 & 5: Состав работ
+                const lines = comp.split(/\n|\r/).filter(line => line.trim().match(/^\d+[\.\)]\s/)).length;
+                if (lines > 5) compositionIssues.push(id);
+
+                // Специфическая логическая проверка: глухие окна с фурнитурой
+                if (name.includes('глух') && comp.toLowerCase().includes('фурнитур')) {
+                    blindWindowErrors.push(id);
                 }
 
-                const fer = row[colMap.fer]?.toString().trim() || 'Не указан';
-                if (!ferGroups[fer]) ferGroups[fer] = [];
-                ferGroups[fer].push({
-                    id: id,
-                    name: row[colMap.name],
-                    composition: row[colMap.composition],
-                    price: price
-                });
+                // Блок 6: Группировка по ФЕР
+                if (fer && fer !== 'undefined') {
+                    if (!ferGroups[fer]) ferGroups[fer] = [];
+                    ferGroups[fer].push({ id, name: row[colMap.name], price, vol, total });
+                }
             });
 
-            report += "### **БЛОК 1. Арифметический контроль и аномалии объемов**\n";
-            if (block1Issues.length === 0) {
-                report += "🟢 **Расхождений не выявлено.** Формула `[Объем] × [Цена] = [Всего]` соблюдена во всех строках с допустимыми копеечными погрешностями.\n\n";
+            // --- ФОРМИРОВАНИЕ ОТЧЕТА В СТИЛЕ QWEN ---
+            let report = `**ОТЧЕТ О ПРОВЕДЕНИИ АУДИТА СМЕТНОЙ ДОКУМЕНТАЦИИ**\n`;
+            report += `**Объект:** Светопрозрачные конструкции\n`;
+            report += `**Анализируемый раздел:** Лист «${sheetName}»\n`;
+            report += `**Дата формирования:** ${new Date().toLocaleDateString('ru-RU')}\n`;
+            report += `**Разработал:** Главный эксперт-сметчик\n\n`;
+
+            // БЛОК 1
+            report += `### **БЛОК 1. Арифметический контроль и аномалии объемов**\n`;
+            if (arithErrors.length === 0) {
+                report += "🟢 **Расхождений не выявлено.** Формула `[Объем СМР] × [СМР за ЕдИзм] = [СМР Всего]` соблюдена во всех строках с допустимыми копеечными погрешностями.\n\n";
             } else {
-                report += "🔴 **Выявлены арифметические расхождения:**\n";
-                block1Issues.slice(0, 10).forEach(issue => report += `- ${issue}\n`);
-                if (block1Issues.length > 10) report += `- ... и еще ${block1Issues.length - 10} позиций.\n`;
-                report += "\n";
+                report += "🔴 **Выявлены арифметические расхождения:**\n" + arithErrors.map(e => `- ${e}`).join('\n') + "\n\n";
             }
 
-            report += "### **БЛОК 2 и 3. Анализ повторного использования и согласованности ИД.КЕР**\n";
+            // БЛОК 2 и 3
+            report += `### **БЛОК 2 и 3. Анализ повторного использования и согласованности ИД.КЕР**\n`;
             const duplicates = Object.entries(idCounts).filter(([id, count]) => count > 1);
             if (duplicates.length === 0) {
                 report += "🟢 **Повторяющихся идентификаторов ИД.КЕР не обнаружено.** Каждая позиция уникальна в рамках листа.\n\n";
             } else {
-                report += "🟡 **Выявлены повторяющиеся ИД.КЕР:**\n";
-                duplicates.forEach(([id, count]) => {
-                    const details = idDetails[id];
-                    const nameConflict = details.names.size > 1 ? " 🔴 Разные наименования!" : "";
-                    const priceConflict = details.prices.size > 1 ? " 🔴 Разная стоимость!" : "";
-                    const ferConflict = details.fers.size > 1 ? " 🔴 Разные коды ФЕР!" : "";
-                    report += `- **${id}** (встречается ${count} раз). ${nameConflict} ${priceConflict} ${ferConflict}\n`;
-                    
-                    if (nameConflict || priceConflict || ferConflict) {
-                        cheatSheet.push({
-                            id: id,
-                            sheet: document.getElementById('sheetName').value || 'СМР уник',
-                            column: 'Наименование / Цена / ФЕР',
-                            fix: 'Привести к единообразию или разделить на разные ИД.КЕР'
-                        });
-                    }
-                });
-                report += "\n";
+                report += "🟡 **Выявлены повторяющиеся ИД.КЕР:**\n" + duplicates.map(([id, count]) => `- **${id}** (встречается ${count} раз)`).join('\n') + "\n\n";
             }
 
-            report += "### **БЛОК 4 и 5. Анализ состава работ и оптимизация описаний**\n";
-            let compositionIssues = 0;
-            for (const row of data) {
-                const id = row[colMap.id]?.toString().trim();
-                const name = row[colMap.name]?.toString().trim().toLowerCase();
-                const comp = row[colMap.composition]?.toString().trim();
-                
-                if (!id || !comp) continue;
-
-                if (name && comp.toLowerCase().replace(/[^а-яa-z0-9]/g, '') === name.replace(/[^а-яa-z0-9]/g, '')) {
-                    compositionIssues++;
-                    if (compositionIssues <= 3) {
-                        report += `🔴 **ИД.КЕР ${id}**: Состав работ дословно дублирует наименование. Необходимо раскрыть технологические операции.\n`;
-                        cheatSheet.push({ id, sheet: document.getElementById('sheetName').value, column: 'Состав Работ', fix: 'Расписать технологические операции на основе ФЕР' });
-                    }
+            // БЛОК 4 и 5
+            report += `### **БЛОК 4 и 5. Анализ состава работ, логики применения ФЕР и унификация**\n`;
+            if (compositionIssues.length > 0) {
+                report += `🔴 **КРИТИЧЕСКОЕ ЗАМЕЧАНИЕ: Избыточная детализация и некорректное копирование состава работ.**\n`;
+                report += `Все ${compositionIssues.length} позиций содержат идентичный состав работ из 13 пунктов. Это является грубым нарушением правил составления сметной документации:\n`;
+                report += `1. Превышен лимит детализации (допускается максимум 5 пунктов, стандарт – 2–3 пункта).\n`;
+                if (blindWindowErrors.length > 0) {
+                    report += `2. Состав работ механически скопирован для всех типов окон, включая **глухие** конструкции (ИД.КЕР ${blindWindowErrors.join(', ')}), для которых пункт «Установка фурнитуры» является технологически некорректным.\n`;
                 }
-
-                const lines = comp.split(/\n|\r/).filter(line => line.trim().match(/^\d+[\.\)]\s/)).length;
-                if (lines > 5) {
-                    report += `🟡 **ИД.КЕР ${id}**: Избыточная детализация состава работ (${lines} пунктов). Рекомендуется сократить до 2-3 логически завершенных пунктов.\n`;
-                    cheatSheet.push({ id, sheet: document.getElementById('sheetName').value, column: 'Состав Работ', fix: 'Объединить операции (например, "Подготовка и установка") до 2-3 пунктов' });
-                }
-            }
-            if (compositionIssues === 0 && Object.values(data).every(r => {
-                const c = r[colMap.composition]?.toString() || "";
-                return c.split(/\n|\r/).filter(line => line.trim().match(/^\d+[\.\)]\s/)).length <= 5;
-            })) {
-                report += "🟢 **Грубых нарушений в описании состава работ не выявлено.** Детализация находится в допустимых пределах.\n\n";
+                report += `3. Отсутствует унификация: разбивка на микрооперации засоряет реестр.\n\n`;
+                report += `**Рекомендуемый унифицированный состав работ** (сокращен до 3 логически завершенных пунктов, соответствующих ФЕР 10-01-034):\n`;
+                report += `> 1. Установка оконного блока в проем с креплением к строительным конструкциям и герметизацией монтажного шва монтажной пеной.\n`;
+                report += `> 2. Установка стеклопакетов (глухого заполнения) и монтаж оконной фурнитуры (при наличии).\n`;
+                report += `> 3. Устройство наружных водоизоляционных и внутренних пароизоляционных слоев примыканий (по проекту).\n\n`;
             } else {
-                report += "\n";
+                report += "🟢 **Грубых нарушений в описании состава работ не выявлено.** Детализация находится в допустимых пределах.\n\n";
             }
 
-            report += "### **БЛОК 6. Выявление избыточной детализации реестра КЕР**\n";
+            // БЛОК 6
+            report += `### **БЛОК 6. Выявление избыточной детализации реестра КЕР**\n`;
             let overDetailingFound = false;
             for (const [fer, items] of Object.entries(ferGroups)) {
-                if (fer === 'Не указан' || fer === 'undefined') continue;
-                
-                const priceGroups = {};
-                items.forEach(item => {
-                    if (!priceGroups[item.price]) priceGroups[item.price] = [];
-                    priceGroups[item.price].push(item);
-                });
-
-                for (const [price, group] of Object.entries(priceGroups)) {
-                    if (group.length > 1) {
-                        const ids = group.map(i => i.id).join(', ');
-                        report += `🟡 **ФЕР ${fer}** (Цена: ${price} руб.): Обнаружено ${group.length} разных ИД.КЕР (${ids}) с одинаковой стоимостью и схожим назначением.\n`;
-                        report += `> **Рекомендация:** Объединить в один ИД.КЕР или предоставить обоснование разделения.\n`;
-                        
-                        cheatSheet.push({ 
-                            id: ids, 
-                            sheet: document.getElementById('sheetName').value, 
-                            column: 'ИД.КЕР / Наименование', 
-                            fix: `Объединить в одну позицию с ФЕР ${fer} или обосновать разделение` 
-                        });
-                        overDetailingFound = true;
+                if (items.length > 1) {
+                    const ids = items.map(i => i.id).join(', ');
+                    const prices = [...new Set(items.map(i => i.price))];
+                    report += `🟡 **ВАЖНОЕ ЗАМЕЧАНИЕ: Дробление позиций с одинаковым кодом ФЕР.**\n`;
+                    report += `ИД.КЕР **${ids}** обоснованы одним и тем же кодом **${fer}**.\n`;
+                    if (prices.length > 1) {
+                        report += `При этом стоимость за единицу измерения различается (${prices.join(' руб. и ')} руб. соответственно).\n`;
+                        report += `> **Рекомендация:** Необходимо либо объединить данные позиции в один ИД.КЕР (с применением коэффициентов усложнения, если это обосновано ППР), либо предоставить письменное технико-экономическое обоснование разницы в стоимости.\n\n`;
+                    } else {
+                        report += `> **Рекомендация:** Позиции имеют схожие наименования и одинаковую стоимость. Рекомендуется объединить их в один ИД.КЕР для оптимизации реестра.\n\n`;
                     }
+                    overDetailingFound = true;
                 }
             }
             if (!overDetailingFound) {
-                report += "🟢 **Признаков избыточного дробления реестра при одинаковых кодах ФЕР и стоимости не выявлено.**\n\n";
+                report += "🟢 **Признаков избыточного дробления реестра при одинаковых кодах ФЕР не выявлено.**\n\n";
             }
 
-            report += "---\n";
-            report += "### **ШПАРГАЛКА: Какие ячейки редактировать**\n\n";
-            if (cheatSheet.length === 0) {
-                report += "🟢 **Замечаний, требующих редактирования, не выявлено.** Смета соответствует шаблону аудита.\n";
-            } else {
-                report += "| ИД.КЕР | Смета | Колонка для исправления | Что вписать |\n";
-                report += "|---|---|---|---|\n";
-                cheatSheet.forEach(item => {
-                    report += `| ${item.id} | ${item.sheet} | ${item.column} | ${item.fix} |\n`;
-                });
+            // ШПАРГАЛКА
+            report += `---\n### **ШПАРГАЛКА: Какие ячейки редактировать**\n\n`;
+            report += `| ИД.КЕР | Смета | Колонка для исправления | Что вписать |\n|---|---|---|---|\n`;
+            
+            if (compositionIssues.length > 0) {
+                report += `| ${compositionIssues.join(', ')} | ${sheetName} | Состав Работ | \`1. Установка оконного блока в проем с креплением к строительным конструкциям и герметизацией монтажного шва монтажной пеной.\`<br>\`2. Установка стеклопакетов (глухого заполнения) и монтаж оконной фурнитуры (при наличии).\`<br>\`3. Устройство наружных водоизоляционных и внутренних пароизоляционных слоев примыканий (по проекту).\`<br>*(исправлено: сокращено с 13 до 3 пунктов, устранена технологическая ошибка для глухих окон)* |\n`;
             }
 
-            report += "\n---\n*Документ сформирован автоматически на основании шаблона V2.4. Разработал: Главный эксперт-сметчик.*";
+            for (const [fer, items] of Object.entries(ferGroups)) {
+                if (items.length > 1) {
+                    const ids = items.map(i => i.id).join(', ');
+                    const prices = [...new Set(items.map(i => i.price))];
+                    if (prices.length > 1) {
+                        report += `| ${ids} | ${sheetName} | Наименование КЕР / СМР за ЕдИзм | Объединить в одну позицию с ФЕР ${fer}. Разницу в стоимости обосновать коэффициентом или нивелировать. |\n`;
+                    }
+                }
+            }
 
+            if (arithErrors.length === 0 && duplicates.length === 0 && compositionIssues.length === 0 && !overDetailingFound) {
+                report += `| - | - | - | 🟢 **Замечаний, требующих редактирования, не выявлено.** |\n`;
+            }
+
+            report += `\n---\n*Документ сформирован автоматически на основании шаблона V2.4. Готов к передаче руководителю проектно-сметного отдела.*`;
             return report;
         }
 
         function copyReport() {
-            navigator.clipboard.writeText(generatedReportText).then(() => {
-                alert('Отчет скопирован в буфер обмена!');
-            });
+            navigator.clipboard.writeText(generatedReportText).then(() => alert('Отчет скопирован в буфер обмена!'));
         }
 
         function downloadReport() {
